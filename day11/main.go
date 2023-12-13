@@ -14,6 +14,7 @@ type galaxy struct {
 }
 
 var galaxies []galaxy
+var origGalaxies []galaxy
 
 func intAbs(i int) int {
 	if i < 0 {
@@ -45,6 +46,16 @@ func expandRows(space [][]byte) [][]byte {
 	return newSpace
 }
 
+func getEmptyRows(space [][]byte) []int {
+	var emptyRows []int
+	for i, r := range space {
+		if regexp.MustCompile(`^\.+$`).Match(r) {
+			emptyRows = append(emptyRows, i)
+		}
+	}
+	return emptyRows
+}
+
 func main() {
 	file, err := os.OpenFile("input.txt", os.O_RDONLY, 0)
 	if err != nil {
@@ -63,6 +74,8 @@ func main() {
 	for _, line := range lines {
 		space = append(space, []byte(line))
 	}
+
+	origSpace := space
 
 	fmt.Printf("Space size: %d x %d\n", len(space[0]), len(space))
 	// expand rows
@@ -95,6 +108,51 @@ func main() {
 			g2 := galaxies[j]
 			distance := intAbs(g1.x-g2.x) + intAbs(g1.y-g2.y)
 			sum += distance
+		}
+	}
+	fmt.Println(sum)
+
+	fmt.Println("Part2")
+
+	for y := 0; y < len(origSpace); y++ {
+		for x := 0; x < len(origSpace[0]); x++ {
+			if origSpace[y][x] == '#' {
+				origGalaxies = append(origGalaxies, galaxy{x, y})
+			}
+		}
+	}
+
+	emptyRows := getEmptyRows(origSpace)
+	origSpace = transpose(origSpace)
+	emptyCols := getEmptyRows(origSpace)
+
+	fmt.Println("Empty rows: ", emptyRows, ", empty cols: ", emptyCols)
+	for i, g := range origGalaxies {
+		fmt.Println("Galaxy #", i, "orig coords: ", g.x, g.y)
+		for _, er := range emptyRows {
+			if origGalaxies[i].y > er {
+				g.y += (1e6 - 1) // because they said we should 'replace' 1 by 1M
+			}
+		}
+		for _, ec := range emptyCols {
+			if origGalaxies[i].x > ec {
+				g.x += (1e6 - 1)
+			}
+		}
+		origGalaxies[i] = g
+		fmt.Println("Galaxy #", i, "updated coords: ", g.x, g.y)
+	}
+
+	sum = 0
+	for i := range origGalaxies {
+		fmt.Printf("galaxy %d , adding #: ", i)
+		for j := i + 1; j < len(origGalaxies); j++ {
+			g1 := origGalaxies[i]
+			g2 := origGalaxies[j]
+			distance := intAbs(g1.x-g2.x) + intAbs(g1.y-g2.y)
+			fmt.Printf("%d %d", j, distance)
+			sum += distance
+			fmt.Println()
 		}
 	}
 	fmt.Println(sum)
