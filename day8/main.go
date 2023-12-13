@@ -75,22 +75,27 @@ func main() {
 	fmt.Println("Part 2")
 	var currentNodes []string
 	// how many keys end with "A"?
-	for k, _ := range nodes {
-		if k[2] == 'A' {
-			currentNodes = append(currentNodes, k)
+	for n := range nodes {
+		if n[2] == 'A' {
+			currentNodes = append(currentNodes, n)
 		}
 	}
+	// fmt.Println("Nodes with A at the end", currentNodes)
 	var steps2 int
 	for i := 0; ; i++ {
 		if i >= len(turns) {
 			i = 0
 		}
-		//fmt.Printf("Current nodes: %v ", currentNodes)
-		for i, cn := range currentNodes {
+		//	fmt.Printf("turn: %s\n", string(turns[i]))
+		//	fmt.Printf("Current nodes: %v\n", currentNodes)
+		//	for _, cur := range currentNodes {
+		//		fmt.Println("cur node: ", cur, "left: ", nodes[cur].left, "right: ", nodes[cur].right)
+		//	}
+		for j, cn := range currentNodes {
 			if turns[i] == 'L' {
-				currentNodes[i] = nodes[cn].left
+				currentNodes[j] = nodes[cn].left
 			} else if turns[i] == 'R' {
-				currentNodes[i] = nodes[cn].right
+				currentNodes[j] = nodes[cn].right
 			}
 		}
 		//fmt.Printf("Next nodes: %v\n", currentNodes)
@@ -98,13 +103,17 @@ func main() {
 		if steps2%10000000 == 0 {
 			p.Println("Steps so far: ", steps2)
 		}
-		allZ := true
+		countZ := 0
 		for _, cn := range currentNodes {
-			if cn[2] != byte('Z') {
-				allZ = false
+			//fmt.Printf("%s ", string(cn[2]))
+			if cn[2] == byte('Z') {
+				countZ++
 			}
 		}
-		if allZ {
+		if countZ > 3 {
+			fmt.Println("countZ: ", countZ)
+		}
+		if countZ == len(currentNodes) {
 			break
 		}
 	}
